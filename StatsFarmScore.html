@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Braves Prospect Card Generator</title>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+</head>
+
+<body style="font-family:Arial;padding:20px;">
+
+<h2>Braves Prospect Card Generator</h2>
+
+<select id="playerSelect"></select>
+<button onclick="generateCard()">Generate</button>
+<button onclick="exportPNG()">Export PNG</button>
+
+<div id="card"></div>
+
+<script>
+
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/13D5cvWOVv9u7zOOQzT_jIoAMSu05NSWpX3KV4Y_aT0A/export?format=csv";
+
+let players = [];
+
+// Load data automatically
+fetch(SHEET_URL)
+.then(res => res.text())
+.then(text => {
+  const rows = text.split("\n").map(r => r.split(","));
+  const headers = rows[0];
+
+  players = rows.slice(1).map(r => {
+    let obj = {};
+    headers.forEach((h,i)=> obj[h.trim()] = r[i]);
+    return obj;
+  });
+
+  const sel = document.getElementById("playerSelect");
+
+  players.forEach((p,i)=>{
+    let opt = document.createElement("option");
+    opt.value = i;
+    opt.text = p.Name || p.name || "Player";
+    sel.appendChild(opt);
+  });
+
+});
+
+// Generate card
+function generateCard(){
+  const p = players[document.getElementById("playerSelect").value];
+
+  document.getElementById("card").innerHTML = `
+    <div style="border:3px solid black;padding:15px;width:300px;">
+      <h3>${p.Name}</h3>
+      <p>Level: ${p.Level}</p>
+      <p>ISO: ${p["ISO"]}</p>
+      <p>Contact%: ${p["Contact%"]}</p>
+      <p>BB/K: ${p["BB/K"]}</p>
+      <p>Updated: ${p.LastUpdated || ""}</p>
+    </div>
+  `;
+}
+
+// Export PNG
+async function exportPNG(){
+  const canvas = await html2canvas(document.getElementById("card"));
+  const link = document.createElement("a");
+  link.download = "card.png";
+  link.href = canvas.toDataURL();
+  link.click();
+}
+
+</script>
+
+</body>
+</html>
