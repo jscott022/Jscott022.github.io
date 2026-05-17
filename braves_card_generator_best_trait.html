@@ -1,0 +1,944 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Braves Prospect Card Generator</title>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <style>
+    :root{
+      --navy:#071528;
+      --navy2:#0b203a;
+      --red:#ce1432;
+      --red2:#9f1028;
+      --gold:#f6c84c;
+      --green:#22c55e;
+      --yellow:#fbbf24;
+      --bad:#ef4444;
+      --ink:#f8fafc;
+      --muted:#9fb0c8;
+      --line:rgba(255,255,255,.16);
+      --shadow:0 18px 45px rgba(0,0,0,.35);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      padding:14px;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background:#e9eef5;
+      color:#0f172a;
+    }
+
+    .appTop{
+      max-width:1280px;
+      margin:0 auto 12px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .appTitle{
+      font-weight:950;
+      font-size:22px;
+      color:#10233d;
+    }
+
+    .controls{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+    }
+
+    select,button{
+      border:1px solid #cbd5e1;
+      border-radius:10px;
+      padding:10px 12px;
+      background:#fff;
+      font-weight:800;
+      color:#10233d;
+    }
+
+    button{
+      background:#10233d;
+      color:#fff;
+      border-color:#10233d;
+    }
+
+    #status{
+      max-width:1280px;
+      margin:0 auto 10px;
+      color:#64748b;
+      font-size:13px;
+      font-weight:700;
+    }
+
+    .stage{
+      display:flex;
+      justify-content:center;
+      overflow-x:auto;
+      padding-bottom:8px;
+    }
+
+    .card{
+      width:1280px;
+      min-height:760px;
+      background:
+        radial-gradient(850px 460px at 88% -20%, rgba(206,20,50,.34), transparent 58%),
+        radial-gradient(560px 340px at 0% 0%, rgba(57,114,184,.38), transparent 55%),
+        linear-gradient(135deg,var(--navy),var(--navy2) 55%,#07111f);
+      color:var(--ink);
+      border:2px solid rgba(255,255,255,.22);
+      border-radius:24px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+      position:relative;
+    }
+
+    .card:before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px),
+        linear-gradient(rgba(255,255,255,.032) 1px,transparent 1px);
+      background-size:44px 44px;
+      mask-image:linear-gradient(to bottom,rgba(0,0,0,.75),transparent 75%);
+      pointer-events:none;
+    }
+
+    .hero{
+      position:relative;
+      padding:22px 24px 18px;
+      display:grid;
+      grid-template-columns:130px 1fr 205px;
+      gap:20px;
+      align-items:center;
+      border-bottom:1px solid var(--line);
+    }
+
+    .headshot{
+      width:130px;
+      height:130px;
+      border-radius:22px;
+      background:linear-gradient(135deg,#dbeafe,#f8fafc);
+      border:3px solid var(--red);
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#334155;
+      font-weight:950;
+      font-size:18px;
+      box-shadow:0 12px 24px rgba(0,0,0,.25);
+      flex:0 0 auto;
+    }
+
+    .headshot img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .rankName{
+      display:flex;
+      align-items:baseline;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .rank{
+      color:var(--red);
+      font-size:33px;
+      font-weight:950;
+    }
+
+    .name{
+      margin:0;
+      font-size:44px;
+      line-height:1;
+      font-weight:1000;
+      text-transform:uppercase;
+      letter-spacing:.5px;
+      text-shadow:0 3px 0 rgba(0,0,0,.18);
+      max-width:760px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .subtitle{
+      margin-top:8px;
+      color:#ffccd5;
+      font-size:16px;
+      font-weight:950;
+      text-transform:uppercase;
+      letter-spacing:.9px;
+    }
+
+    .pills{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+
+    .pill{
+      border:1px solid rgba(255,255,255,.22);
+      background:rgba(255,255,255,.08);
+      border-radius:999px;
+      padding:7px 11px;
+      font-weight:900;
+      font-size:12px;
+      color:#dbeafe;
+    }
+
+    .scoreBox{
+      border:3px solid var(--red);
+      border-radius:18px;
+      padding:14px 12px;
+      text-align:center;
+      background:rgba(2,6,23,.48);
+      box-shadow:inset 0 0 32px rgba(255,255,255,.04);
+    }
+
+    .scoreBox .k{
+      font-size:12px;
+      font-weight:950;
+      color:#dbeafe;
+      text-transform:uppercase;
+      letter-spacing:.9px;
+    }
+
+    .scoreBox .v{
+      font-size:56px;
+      font-weight:1000;
+      line-height:.95;
+      margin-top:7px;
+    }
+
+    .scoreBox .s{
+      color:#ffccd5;
+      font-size:12px;
+      font-weight:900;
+      margin-top:7px;
+    }
+
+    .summaryGrid{
+      position:relative;
+      padding:15px 24px 16px;
+      display:grid;
+      grid-template-columns:repeat(6,1fr);
+      gap:0;
+    }
+
+    .summaryCell{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.06);
+      padding:12px 8px;
+      text-align:center;
+      min-height:78px;
+    }
+
+    .summaryCell:first-child{border-radius:14px 0 0 14px}
+    .summaryCell:last-child{border-radius:0 14px 14px 0}
+
+    .summaryCell .k{
+      font-size:11px;
+      color:var(--muted);
+      font-weight:950;
+      text-transform:uppercase;
+      letter-spacing:.6px;
+    }
+
+    .summaryCell .v{
+      margin-top:7px;
+      font-size:27px;
+      font-weight:1000;
+    }
+
+    .summaryCell .s{
+      margin-top:4px;
+      font-size:11px;
+      font-weight:900;
+      color:#b9c7db;
+    }
+
+    .compactGrid{
+      position:relative;
+      padding:0 24px 18px;
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:14px;
+    }
+
+    .panel{
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:rgba(2,6,23,.30);
+      overflow:hidden;
+      min-height:245px;
+    }
+
+    .panelTitle{
+      background:linear-gradient(90deg,var(--red2),var(--red));
+      color:#fff;
+      text-align:center;
+      padding:9px 11px;
+      font-weight:950;
+      text-transform:uppercase;
+      letter-spacing:.7px;
+      font-size:14px;
+    }
+
+    .statRows{
+      padding:11px 14px;
+    }
+
+    .metricRow{
+      display:grid;
+      grid-template-columns:1fr 72px 96px;
+      gap:10px;
+      align-items:center;
+      padding:7px 0;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+
+    .metricRow:last-child{border-bottom:0}
+
+    .metricName{
+      font-weight:900;
+      color:#dbeafe;
+      font-size:14px;
+    }
+
+    .metricVal{
+      font-weight:1000;
+      text-align:right;
+      font-size:16px;
+    }
+
+    .barWrap{
+      height:12px;
+      background:rgba(255,255,255,.12);
+      border-radius:999px;
+      overflow:hidden;
+    }
+
+    .bar{
+      height:100%;
+      border-radius:999px;
+    }
+
+    .miniTiles{
+      padding:12px;
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:9px;
+    }
+
+    .tile{
+      border:1px solid rgba(255,255,255,.16);
+      border-radius:13px;
+      padding:10px;
+      background:rgba(255,255,255,.055);
+      text-align:center;
+    }
+
+    .tile .k{
+      font-size:10px;
+      color:var(--muted);
+      font-weight:950;
+      text-transform:uppercase;
+      letter-spacing:.6px;
+    }
+
+    .tile .v{
+      font-size:23px;
+      font-weight:1000;
+      margin-top:5px;
+    }
+
+    .donutRow{
+      display:grid;
+      grid-template-columns:138px 1fr;
+      gap:10px;
+      align-items:center;
+      padding:14px;
+    }
+
+    .qualityDonut{
+      width:132px;
+      height:132px;
+      border-radius:50%;
+      background:conic-gradient(var(--green) 0 73%, var(--yellow) 73% 89%, var(--bad) 89% 100%);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow:0 0 0 8px rgba(255,255,255,.04);
+    }
+
+    .donutInner{
+      width:84px;
+      height:84px;
+      border-radius:50%;
+      background:#08203a;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      border:1px solid rgba(255,255,255,.14);
+    }
+
+    .donutInner .v{
+      font-size:27px;
+      font-weight:1000;
+    }
+
+    .donutInner .k{
+      font-size:10px;
+      color:var(--muted);
+      font-weight:900;
+      text-transform:uppercase;
+    }
+
+    .calloutBand{
+      position:relative;
+      margin:0 24px 18px;
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:12px;
+    }
+
+    .callout{
+      border:1px solid var(--line);
+      border-left:6px solid var(--gold);
+      background:rgba(255,255,255,.075);
+      border-radius:15px;
+      padding:12px 14px;
+      min-height:74px;
+    }
+
+    .callout .k{
+      font-size:11px;
+      color:var(--muted);
+      font-weight:950;
+      text-transform:uppercase;
+      letter-spacing:.7px;
+    }
+
+    .callout .v{
+      margin-top:5px;
+      font-size:17px;
+      font-weight:950;
+      color:#fff;
+    }
+
+    .footer{
+      border-top:1px solid var(--line);
+      padding:13px 24px 15px;
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+      color:#b9c7db;
+      font-weight:900;
+      font-size:13px;
+      position:relative;
+    }
+
+    .watermark{
+      color:#ff385c;
+      font-weight:1000;
+    }
+
+    @media(max-width:900px){
+      body{padding:8px}
+      .stage{justify-content:flex-start}
+      .card{width:1180px;min-width:1180px}
+      .appTop{align-items:flex-start}
+    }
+  </style>
+</head>
+<body>
+  <div class="appTop">
+    <div class="appTitle">Braves Prospect Card Generator</div>
+    <div class="controls">
+      <select id="typeSelect">
+        <option value="Hitters">Hitters</option>
+        <option value="Pitchers">Pitchers</option>
+      </select>
+      <input id="playerSearch" type="text" placeholder="Search player..." style="border:1px solid #cbd5e1;border-radius:10px;padding:10px 12px;background:#fff;font-weight:700;color:#10233d;min-width:180px;">
+      <select id="playerSelect"></select>
+      <button id="genBtn">Generate</button>
+      <button id="pngBtn">Export PNG</button>
+    </div>
+  </div>
+
+  <div id="status"></div>
+  <div class="stage"><div id="cardArea"></div></div>
+
+  <script>
+    const BASE_SHEET = "https://docs.google.com/spreadsheets/d/13D5cvWOVv9u7zOOQzT_jIoAMSu05NSWpX3KV4Y_aT0A/gviz/tq?tqx=out:csv&sheet=";
+    let players = [];
+    let filteredPlayers = [];
+    let currentType = "Hitters";
+
+    function parseCSV(text){
+      const lines=text.split(/\r?\n/).filter(l=>l.trim()!=='');
+      return lines.map(line=>{
+        let out=[],cur='',inQ=false;
+        for(let i=0;i<line.length;i++){
+          const ch=line[i];
+          if(ch==='"'){inQ=!inQ;continue;}
+          if(ch===','&&!inQ){out.push(cur);cur='';continue;}
+          cur+=ch;
+        }
+        out.push(cur);
+        return out.map(s=>s.trim());
+      });
+    }
+
+    function cleanHeader(h){return String(h||'').replace(/^\uFEFF/,'').trim()}
+    function safe(v){return (v===undefined||v===null||String(v).trim()==='')?'—':String(v).trim()}
+    function n(v){const x=Number(String(v??'').replace('%','').trim());return Number.isFinite(x)?x:null}
+    function fmt(v,d=1){const x=n(v);return x===null?'—':x.toFixed(d).replace(/\.0$/,'')}
+    function setStatus(m){document.getElementById('status').textContent=m}
+
+    function sevHitter(stat,v){
+      const x=n(v); if(x===null)return null;
+      if(stat==='Chase%')return x<26?0:x<=30?1:2;
+      if(stat==='K%')return x<=22?0:x<=26?1:2;
+      if(stat==='BB%')return x>=10?0:x>=8?1:2;
+      if(stat==='Whiff%')return x<=22?0:x<=26?1:2;
+      if(stat==='ZoneContact%')return x>=84?0:x>=80?1:2;
+      if(stat==='O-Contact %'||stat==='O-Contact%')return x>=65?0:x>=55?1:2;
+      if(stat==='GB%')return x<=45?0:x<=50?1:2;
+      if(stat==='HardHit%')return x>42?0:x>=36?1:2;
+      if(stat==='Barrel%')return x>9?0:x>=6?1:2;
+      return null;
+    }
+
+    function sevPitcher(stat,v){
+      const x=n(v); if(x===null)return null;
+      if(stat==='SwStr%')return x>=12?0:x>=10?1:2;
+      if(stat==='CalledStrike%')return x>=16?0:x>=13?1:2;
+      if(stat==='K%')return x>=25?0:x>=20?1:2;
+      if(stat==='BB%')return x<=8?0:x<=10?1:2;
+      if(stat==='Z-Contact Allowed')return x<=83?0:x<=86?1:2;
+      if(stat==='O-Contact Allowed')return x<=55?0:x<=65?1:2;
+      if(stat==='GB%')return x>=45?0:x>=40?1:2;
+      if(stat==='HR/FB%')return x<10?0:x<=15?1:2;
+      return null;
+    }
+
+    const W_H={
+      BBK:{'K%':.45,'BB%':.35,'Chase%':.20},
+      CONTACT:{'Whiff%':.45,'ZoneContact%':.35,'O-Contact %':.20},
+      ISO:{'GB%':.35,'HardHit%':.35,'Barrel%':.30}
+    };
+
+    const W_P={
+      CSW:{'SwStr%':.60,'CalledStrike%':.40},
+      KBB:{'K%':.60,'BB%':.40},
+      CONTACT:{'Z-Contact Allowed':.60,'O-Contact Allowed':.40},
+      DAMAGE:{'GB%':.55,'HR/FB%':.45}
+    };
+
+    function weightedScore(sevMap,weights){
+      let num=0,den=0,red=false;
+      for(const [k,w] of Object.entries(weights)){
+        let s=sevMap[k];
+        if(s===undefined&&k==='O-Contact %')s=sevMap['O-Contact%'];
+        if(s===null||s===undefined)continue;
+        num+=w*s; den+=w;
+        if(s===2)red=true;
+      }
+      if(!den)return{score:null,red:false};
+      return{score:num/den,red};
+    }
+
+    function color(score,red){
+      if(score===null)return'#334155';
+      let c=score<.5?'#22c55e':score<1.25?'#fbbf24':'#ef4444';
+      if(red&&c==='#22c55e')c='#fbbf24';
+      return c;
+    }
+
+    function topDrivers(sevMap,weights){
+      const items=Object.entries(weights).map(([k,w])=>{
+        let s=sevMap[k];
+        if(s===undefined&&k==='O-Contact %')s=sevMap['O-Contact%'];
+        return{k,contrib:s==null?null:w*s}
+      }).filter(x=>x.contrib!==null).sort((a,b)=>b.contrib-a.contrib);
+      if(!items.length)return[];
+      const top=items[0].contrib;
+      return items.filter(x=>(top-x.contrib)<=.05&&x.contrib>0).map(x=>x.k);
+    }
+
+    function labelFor(c){return c==='#ef4444'?'Primary Limiting Factor':'Primary Development Lever'}
+
+    function pctWidth(v,min,max,invert=false){
+      const x=n(v);if(x===null)return 0;
+      let p=(x-min)/(max-min);
+      if(invert)p=1-p;
+      return Math.max(8,Math.min(100,p*100));
+    }
+
+    function barRow(name,val,width,bg){
+      return `<div class="metricRow"><div class="metricName">${name}</div><div class="metricVal">${val}</div><div class="barWrap"><div class="bar" style="width:${width}%;background:${bg}"></div></div></div>`
+    }
+
+    function tile(k,v){return `<div class="tile"><div class="k">${k}</div><div class="v">${v}</div></div>`}
+
+    function callout(k,v){
+      return `<div class="callout"><div class="k">${k}</div><div class="v">${v}</div></div>`
+    }
+
+    function buildHeadshotURL(p){
+      const direct=safe(p.HeadshotURL);
+      if(direct!=='—')return direct;
+      const id=safe(p.MLBAMID);
+      return id!=='—'?`https://img.mlbstatic.com/mlb-photos/image/upload/w_400,q_auto:best/v1/people/${id}/headshot/67/current`:'';
+    }
+
+    function parseRankName(name){
+      const rank=(name.match(/^\s*([0-9]+\.?)/)||[])[1]||'';
+      const clean=name.replace(/^\s*[0-9]+\.\s*/, '');
+      return {rank,clean};
+    }
+
+
+    function getTier(score, type){
+      const x = n(score);
+      if(x === null) return 'Watch List';
+
+      if(type === 'Pitchers'){
+        if(x >= 65) return 'Blue Chip';
+        if(x >= 55) return 'Rotation / Late-Inning Arm';
+        if(x >= 45) return 'Swingman / Bullpen';
+        if(x >= 35) return 'Developmental';
+        return 'Watch List';
+      }
+
+      if(x >= 65) return 'Blue Chip';
+      if(x >= 55) return 'Regular';
+      if(x >= 45) return 'Bench Bat';
+      if(x >= 35) return 'Developmental';
+      return 'Watch List';
+    }
+
+    function baseHeader(p, kind, sampleLabel, sampleValue){
+      const {rank,clean}=parseRankName(safe(p.Name));
+      const head=buildHeadshotURL(p);
+      const updated=safe(p.LastUpdated);
+      return `
+        <div class="hero">
+          <div class="headshot">${head?`<img src="${head}" onerror="this.remove();this.parentNode.textContent='PHOTO';">`:'PHOTO'}</div>
+          <div>
+            <div class="rankName">${rank?`<div class="rank">#${rank.replace('.','')}</div>`:''}<h1 class="name">${clean}</h1></div>
+            <div class="subtitle">Atlanta Braves ${kind} Prospect Card</div>
+            <div class="pills">
+              <div class="pill">Level: ${safe(p.Level)}</div>
+              <div class="pill">AgeDiff: ${safe(p.AgeDiff)}</div>
+              <div class="pill">${sampleLabel}: ${safe(sampleValue)}</div>
+              <div class="pill">Updated: ${updated}</div>
+            </div>
+          </div>
+          <div class="scoreBox">
+            <div class="k">Final Score</div>
+            <div class="v">${fmt(p['Final Score'],2)}</div>
+            <div class="s">${getTier(p['Final Score'], currentType)}</div>
+          </div>
+        </div>`;
+    }
+
+    
+    function betterDirection(stat, type){
+      const lowerBetterHitters = ['K%','Chase%','Whiff%','GB%'];
+      const lowerBetterPitchers = ['BB%','Contact%','Z-Contact Allowed','O-Contact Allowed','HR/FB%','FIP'];
+      if(type === 'Pitchers') return lowerBetterPitchers.includes(stat) ? 'lower' : 'higher';
+      return lowerBetterHitters.includes(stat) ? 'lower' : 'higher';
+    }
+
+    function traitListForType(p, type){
+      if(type === 'Pitchers'){
+        return [
+          ['CSW%', p['CSW%'], 22, 35],
+          ['SwStr%', p['SwStr%'], 8, 18],
+          ['CalledStrike%', p['CalledStrike%'], 10, 22],
+          ['K%', p['K%'], 15, 40],
+          ['BB%', p['BB%'], 4, 14],
+          ['Contact%', p['Contact%'], 65, 85],
+          ['Z-Contact Allowed', p['Z-Contact Allowed'], 78, 90],
+          ['O-Contact Allowed', p['O-Contact Allowed'], 45, 75],
+          ['GB%', p['GB%'], 30, 60],
+          ['HR/FB%', p['HR/FB%'], 3, 20],
+          ['FIP', p['FIP'], 1.5, 5.0],
+          ['K/BB%', p['K/BB%'], 5, 35]
+        ];
+      }
+
+      return [
+        ['BB%', p['BB%'], 4, 16],
+        ['K%', p['K%'], 12, 34],
+        ['Chase%', p['Chase%'], 18, 36],
+        ['BB/K', p['BB/K'], .2, 1.1],
+        ['Contact%', p['Contact%'], 65, 85],
+        ['ZoneContact%', p['ZoneContact%'], 76, 90],
+        ['Whiff%', p['Whiff%'], 16, 34],
+        ['O-Contact%', p['O-Contact %'] || p['O-Contact%'], 45, 75],
+        ['ISO', p['ISO'], .08, .30],
+        ['wRC+', p['wRC+'], 50, 180],
+        ['HardHit%', p['HardHit%'], 25, 55],
+        ['Barrel%', p['Barrel%'], 2, 16],
+        ['AvgEV', p['AvgEV'], 82, 94],
+        ['GB%', p['GB%'], 30, 55],
+        ['Pull%', p['Pull%'], 30, 55]
+      ];
+    }
+
+    function traitScore(stat, val, min, max, type){
+      const x = n(val);
+      if(x === null) return null;
+      let score = (x - min) / (max - min);
+      if(betterDirection(stat, type) === 'lower') score = 1 - score;
+      return Math.max(0, Math.min(1, score));
+    }
+
+    function formatTrait(stat, val){
+      const value = safe(val);
+      if(value === '—') return `${stat} (—)`;
+      return `${stat} (${value})`;
+    }
+
+    function getBestAndConcern(p, type){
+      const traits = traitListForType(p, type)
+        .map(([stat, val, min, max]) => ({
+          stat,
+          val,
+          score: traitScore(stat, val, min, max, type)
+        }))
+        .filter(x => x.score !== null);
+
+      if(!traits.length){
+        return {best:'—', concern:'—'};
+      }
+
+      traits.sort((a,b) => b.score - a.score);
+      const best = traits[0];
+      const concern = traits[traits.length - 1];
+
+      return {
+        best: formatTrait(best.stat, best.val),
+        concern: formatTrait(concern.stat, concern.val)
+      };
+    }
+
+function generateHitterCard(p){
+      const sev={};
+      ['BB%','K%','Chase%','Whiff%','ZoneContact%','O-Contact %','O-Contact%','GB%','HardHit%','Barrel%'].forEach(k=>sev[k]=sevHitter(k,p[k]));
+      const b1=weightedScore(sev,W_H.BBK),b2=weightedScore(sev,W_H.CONTACT),b3=weightedScore(sev,W_H.ISO);
+      const buckets=[
+        {name:'BB/K',score:b1.score??-1,border:color(b1.score,b1.red),drivers:topDrivers(sev,W_H.BBK)},
+        {name:'Contact%',score:b2.score??-1,border:color(b2.score,b2.red),drivers:topDrivers(sev,W_H.CONTACT)},
+        {name:'ISO',score:b3.score??-1,border:color(b3.score,b3.red),drivers:topDrivers(sev,W_H.ISO)}
+      ].filter(b=>b.score>=0).sort((a,b)=>b.score-a.score);
+      const primary=buckets[0]||{name:'—',border:'#334155',drivers:[]};
+
+      document.getElementById('cardArea').innerHTML=`
+      <div class="card" id="playerCard">
+        ${baseHeader(p,'Hitting','AB',p.AB)}
+
+        <div class="summaryGrid">
+          <div class="summaryCell"><div class="k">Level</div><div class="v">${safe(p.Level)}</div><div class="s">Assignment</div></div>
+          <div class="summaryCell"><div class="k">AgeDiff</div><div class="v">${safe(p.AgeDiff)}</div><div class="s">vs level</div></div>
+          <div class="summaryCell"><div class="k">BB/K</div><div class="v">${safe(p['BB/K'])}</div><div class="s">Approach</div></div>
+          <div class="summaryCell"><div class="k">Contact%</div><div class="v">${safe(p['Contact%'])}</div><div class="s">Bat-to-ball</div></div>
+          <div class="summaryCell"><div class="k">ISO</div><div class="v">${safe(p.ISO)}</div><div class="s">Impact</div></div>
+          <div class="summaryCell"><div class="k">wRC+</div><div class="v">${safe(p['wRC+'])}</div><div class="s">Production</div></div>
+        </div>
+
+        <div class="compactGrid">
+          <div class="panel">
+            <div class="panelTitle">Decision / Approach</div>
+            <div class="statRows">
+              ${barRow('BB%',safe(p['BB%']),pctWidth(p['BB%'],4,16),'linear-gradient(90deg,#22c55e,#86efac)')}
+              ${barRow('K%',safe(p['K%']),pctWidth(p['K%'],12,34,true),'linear-gradient(90deg,#22c55e,#fbbf24,#ef4444)')}
+              ${barRow('Chase%',safe(p['Chase%']),pctWidth(p['Chase%'],18,36,true),'linear-gradient(90deg,#22c55e,#fbbf24,#ef4444)')}
+              ${barRow('BB/K',safe(p['BB/K']),pctWidth(p['BB/K'],.2,1.1),'linear-gradient(90deg,#fbbf24,#22c55e)')}
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panelTitle">Contact Skills</div>
+            <div class="donutRow">
+              <div class="qualityDonut"><div class="donutInner"><div class="v">${safe(p['Contact%'])}</div><div class="k">Contact</div></div></div>
+              <div class="miniTiles">
+                ${tile('Z-Contact%',safe(p.ZoneContact||p['ZoneContact%']))}
+                ${tile('Whiff%',safe(p.Whiff||p['Whiff%']))}
+                ${tile('O-Contact%',safe(p['O-Contact %']||p['O-Contact%']))}
+                ${tile('AB',safe(p.AB))}
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panelTitle">Impact / Batted Ball</div>
+            <div class="statRows">
+              ${barRow('HardHit%',safe(p.HardHit||p['HardHit%']),pctWidth(p['HardHit%'],25,55),'linear-gradient(90deg,#fbbf24,#ef4444)')}
+              ${barRow('Barrel%',safe(p.Barrel||p['Barrel%']),pctWidth(p['Barrel%'],2,16),'linear-gradient(90deg,#fbbf24,#ef4444)')}
+              ${barRow('AvgEV',safe(p.AvgEV),pctWidth(p.AvgEV,82,94),'linear-gradient(90deg,#fbbf24,#ef4444)')}
+              ${barRow('GB%',safe(p['GB%']),pctWidth(p['GB%'],30,55,true),'linear-gradient(90deg,#22c55e,#fbbf24,#ef4444)')}
+              ${barRow('Pull%',safe(p['Pull%']),pctWidth(p['Pull%'],30,55),'linear-gradient(90deg,#60a5fa,#fbbf24)')}
+            </div>
+          </div>
+        </div>
+
+        <div class="calloutBand">
+          ${callout(labelFor(primary.border), primary.name)}
+          ${callout('Primary Drivers', primary.drivers.length?primary.drivers.join(' + '):'No major red diagnostic')}
+          ${callout('Model Note', `${safe(p['wRC+'])} wRC+ / ${safe(p.AB)} AB sample`)}
+        </div>
+
+        <div class="footer"><div class="watermark">@BravesStatsFarm</div><div>Updated: ${safe(p.LastUpdated)} • Live Google Sheet feed</div></div>
+      </div>`;
+    }
+
+    function generatePitcherCard(p){
+      const sev={};
+      ['SwStr%','CalledStrike%','K%','BB%','Z-Contact Allowed','O-Contact Allowed','GB%','HR/FB%'].forEach(k=>sev[k]=sevPitcher(k,p[k]));
+      const b1=weightedScore(sev,W_P.CSW),b2=weightedScore(sev,W_P.KBB),b3=weightedScore(sev,W_P.CONTACT),b4=weightedScore(sev,W_P.DAMAGE);
+      const buckets=[
+        {name:'CSW%',score:b1.score??-1,border:color(b1.score,b1.red),drivers:topDrivers(sev,W_P.CSW)},
+        {name:'K/BB%',score:b2.score??-1,border:color(b2.score,b2.red),drivers:topDrivers(sev,W_P.KBB)},
+        {name:'Contact Allowed',score:b3.score??-1,border:color(b3.score,b3.red),drivers:topDrivers(sev,W_P.CONTACT)},
+        {name:'GB / Damage',score:b4.score??-1,border:color(b4.score,b4.red),drivers:topDrivers(sev,W_P.DAMAGE)}
+      ].filter(b=>b.score>=0).sort((a,b)=>b.score-a.score);
+      const primary=buckets[0]||{name:'—',border:'#334155',drivers:[]};
+
+      document.getElementById('cardArea').innerHTML=`
+      <div class="card" id="playerCard">
+        ${baseHeader(p,'Pitching','IP',p.IP)}
+
+        <div class="summaryGrid">
+          <div class="summaryCell"><div class="k">Level</div><div class="v">${safe(p.Level)}</div><div class="s">Assignment</div></div>
+          <div class="summaryCell"><div class="k">AgeDiff</div><div class="v">${safe(p.AgeDiff)}</div><div class="s">vs level</div></div>
+          <div class="summaryCell"><div class="k">CSW%</div><div class="v">${safe(p['CSW%'])}</div><div class="s">Strike quality</div></div>
+          <div class="summaryCell"><div class="k">K/BB%</div><div class="v">${safe(p['K/BB%'])}</div><div class="s">PA control</div></div>
+          <div class="summaryCell"><div class="k">Contact%</div><div class="v">${safe(p['Contact%'])}</div><div class="s">Allowed</div></div>
+          <div class="summaryCell"><div class="k">FIP</div><div class="v">${safe(p.FIP)}</div><div class="s">Translation</div></div>
+        </div>
+
+        <div class="compactGrid">
+          <div class="panel">
+            <div class="panelTitle">Strike Generation</div>
+            <div class="statRows">
+              ${barRow('CSW%',safe(p['CSW%']),pctWidth(p['CSW%'],22,35),'linear-gradient(90deg,#fbbf24,#22c55e)')}
+              ${barRow('SwStr%',safe(p['SwStr%']),pctWidth(p['SwStr%'],8,18),'linear-gradient(90deg,#fbbf24,#22c55e)')}
+              ${barRow('Called Strike%',safe(p['CalledStrike%']),pctWidth(p['CalledStrike%'],10,22),'linear-gradient(90deg,#fbbf24,#22c55e)')}
+              ${barRow('K%',safe(p['K%']),pctWidth(p['K%'],15,40),'linear-gradient(90deg,#fbbf24,#22c55e)')}
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panelTitle">Contact Suppression</div>
+            <div class="donutRow">
+              <div class="qualityDonut"><div class="donutInner"><div class="v">${safe(p['Contact%'])}</div><div class="k">Allowed</div></div></div>
+              <div class="miniTiles">
+                ${tile('Z-Contact A',safe(p['Z-Contact Allowed']))}
+                ${tile('O-Contact A',safe(p['O-Contact Allowed']))}
+                ${tile('BB%',safe(p['BB%']))}
+                ${tile('IP',safe(p.IP))}
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panelTitle">Damage / Run Prevention</div>
+            <div class="statRows">
+              ${barRow('GB%',safe(p['GB%']),pctWidth(p['GB%'],30,60),'linear-gradient(90deg,#fbbf24,#22c55e)')}
+              ${barRow('HR/FB%',safe(p['HR/FB%']),pctWidth(p['HR/FB%'],3,20,true),'linear-gradient(90deg,#22c55e,#fbbf24,#ef4444)')}
+              ${barRow('FIP',safe(p.FIP),pctWidth(p.FIP,1.5,5,true),'linear-gradient(90deg,#22c55e,#fbbf24,#ef4444)')}
+              ${barRow('K/BB%',safe(p['K/BB%']),pctWidth(p['K/BB%'],5,35),'linear-gradient(90deg,#fbbf24,#22c55e)')}
+            </div>
+          </div>
+        </div>
+
+        <div class="calloutBand">
+          ${callout(labelFor(primary.border), primary.name)}
+          ${callout('Primary Drivers', primary.drivers.length?primary.drivers.join(' + '):'No major red diagnostic')}
+          ${callout('Model Note', `${safe(p.FIP)} FIP / ${safe(p.IP)} IP sample`)}
+        </div>
+
+        <div class="footer"><div class="watermark">@BravesStatsFarm</div><div>Updated: ${safe(p.LastUpdated)} • Live Google Sheet feed</div></div>
+      </div>`;
+    }
+
+
+    function renderPlayerOptions(searchTerm=''){
+      const sel = document.getElementById('playerSelect');
+      const term = searchTerm.trim().toLowerCase();
+      filteredPlayers = players.filter(p => safe(p.Name).toLowerCase().includes(term));
+      sel.innerHTML = '';
+      filteredPlayers.forEach((p,i)=>{
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = safe(p.Name);
+        sel.appendChild(opt);
+      });
+      if(filteredPlayers.length){
+        generateCard();
+      } else {
+        document.getElementById('cardArea').innerHTML = '';
+      }
+    }
+
+    function generateCard(){
+      const p=filteredPlayers[Number(document.getElementById('playerSelect').value||0)];
+      if(!p)return;
+      currentType==="Pitchers"?generatePitcherCard(p):generateHitterCard(p);
+    }
+
+    async function exportPNG(){
+      const card=document.getElementById('playerCard');
+      if(!card){setStatus('Generate a card first.');return;}
+      const canvas=await html2canvas(card,{scale:2,backgroundColor:null,useCORS:true});
+      const a=document.createElement('a');
+      a.href=canvas.toDataURL('image/png');
+      a.download=currentType==='Pitchers'?'braves-pitcher-card.png':'braves-hitter-card.png';
+      a.click();
+    }
+
+    async function loadSheet(type){
+      currentType=type;
+      setStatus(`Loading ${type} from live Google Sheet...`);
+      try{
+        const text=await fetch(BASE_SHEET+encodeURIComponent(type)).then(r=>r.text());
+        const rows=parseCSV(text);
+        const headers=rows[0].map(cleanHeader);
+        players=rows.slice(1).map(r=>{
+          const o={};
+          headers.forEach((h,i)=>o[h]=(r[i]??'').trim());
+          return o;
+        }).filter(p=>safe(p.Name)!=='—');
+        renderPlayerOptions(document.getElementById('playerSearch').value);
+      }catch(err){
+        setStatus(`Could not load ${type}. Check the sheet tab name and sharing settings.`);
+      }
+    }
+
+    document.getElementById('typeSelect').addEventListener('change',e=>loadSheet(e.target.value));
+    document.getElementById('genBtn').addEventListener('click',generateCard);
+    document.getElementById('playerSearch').addEventListener('input', e => renderPlayerOptions(e.target.value));
+    document.getElementById('playerSelect').addEventListener('change', generateCard);
+    document.getElementById('pngBtn').addEventListener('click',exportPNG);
+    loadSheet('Hitters');
+  </script>
+</body>
+</html>
